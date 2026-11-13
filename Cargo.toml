@@ -1,0 +1,37 @@
+[package]
+name = "dwl-rs"
+version = "0.1.0"
+edition = "2024"
+description = "dwl, the dwm-like Wayland compositor, rewritten in Rust on Smithay"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/kekkker/dwl-rs"
+
+[dependencies]
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+xcursor = "0.3"
+
+[dependencies.smithay]
+git = "https://github.com/Smithay/smithay"
+rev = "9ff2c5a410e91c592e19d6fb126c299308dce119"
+default-features = false
+features = [
+    "backend_drm",
+    "backend_gbm",
+    "backend_egl",
+    "backend_libinput",
+    "backend_session_libseat",
+    "backend_udev",
+    "backend_winit",
+    "renderer_gl",
+    "wayland_frontend",
+    "desktop",
+]
+
+[dependencies.smithay-drm-extras]
+git = "https://github.com/Smithay/smithay"
+rev = "9ff2c5a410e91c592e19d6fb126c299308dce119"
+
+[profile.release]
+lto = true
+strip = true
