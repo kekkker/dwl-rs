@@ -9,7 +9,7 @@ Configuration is done by editing a source file and rebuilding, like dwm.
 - dwm-style tags, `tile`, `monocle` and floating layouts, master/stack with `mfact` and `nmaster`
 - Multiple monitors, each with its own tags and layout
 - dwl's `-s` status output on stdin of the startup command, so bars like [dwlb](https://github.com/kolunmi/dwlb) work unchanged
-- Window rules, sticky windows, autostart, centered floating windows (the dwl patches `autostart`, `sticky`, `always-center`)
+- Window rules, sticky windows, autostart, centered floating windows, a layout per tag (the dwl patches `autostart`, `sticky`, `always-center`, `pertag`)
 - Interactive move and resize with the mouse, sloppy focus
 - Server-side borders, fullscreen with a background
 - Picks the fastest refresh rate at your monitor's native resolution

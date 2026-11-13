@@ -90,20 +90,35 @@ pub struct Monitor {
     pub output: Output,
     pub tagset: [u32; 2],
     pub seltags: usize,
-    pub lt: [usize; 2],
-    pub sellt: usize,
+    pub pertag: Vec<Pertag>, // TAGCOUNT + 1 slots, see pertag()
     pub mfact: f32,
     pub nmaster: i32,
     pub ltsymbol: String,
     pub fullscreen_bg: SolidColorBuffer,
 }
 
+/// Layout pair and selection, kept per tag (pertag patch).
+#[derive(Clone, Copy)]
+pub struct Pertag {
+    pub lt: [usize; 2],
+    pub sellt: usize,
+}
+
 impl Monitor {
     pub fn tags(&self) -> u32 {
         self.tagset[self.seltags]
     }
+    /// A single-tag view uses that tag's slot, multi-tag views share slot 0.
+    fn slot(&self) -> usize {
+        (0..TAGCOUNT).find(|&i| self.tags() == 1 << i).map_or(0, |i| i as usize + 1)
+    }
+    pub fn pertag(&mut self) -> &mut Pertag {
+        let i = self.slot();
+        &mut self.pertag[i]
+    }
     pub fn layout(&self) -> &'static Layout {
-        &LAYOUTS[self.lt[self.sellt]]
+        let pt = &self.pertag[self.slot()];
+        &LAYOUTS[pt.lt[pt.sellt]]
     }
 }
 
@@ -491,8 +506,10 @@ impl State {
             output: output.clone(),
             tagset: [1, 1],
             seltags: 0,
-            lt: [r.layout, if LAYOUTS.len() > 1 && r.layout != 1 { 1 } else { 0 }],
-            sellt: 0,
+            pertag: vec![
+                Pertag { lt: [r.layout, if LAYOUTS.len() > 1 && r.layout != 1 { 1 } else { 0 }], sellt: 0 };
+                TAGCOUNT as usize + 1
+            ],
             mfact: r.mfact,
             nmaster: r.nmaster,
             ltsymbol: LAYOUTS[r.layout].symbol.into(),
@@ -687,12 +704,12 @@ impl State {
             }
             SetLayout(l) => {
                 let Some(mi) = sm else { return };
-                let m = &mut self.mons[mi];
-                if l.is_none_or(|l| l != m.lt[m.sellt]) {
-                    m.sellt ^= 1;
+                let pt = self.mons[mi].pertag();
+                if l.is_none_or(|l| l != pt.lt[pt.sellt]) {
+                    pt.sellt ^= 1;
                 }
                 if let Some(l) = l {
-                    m.lt[m.sellt] = l;
+                    pt.lt[pt.sellt] = l;
                 }
                 self.arrange(mi);
             }
